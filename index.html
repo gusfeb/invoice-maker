@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Invoice Generator</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+</head>
+
+<body>
+    <div class="container">
+        <!-- Form Section -->
+        <div class="form-section" id="formSection">
+            <h2>Invoice Form</h2>
+
+            <div class="form-group"
+                style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #e9ecef;">
+                <label style="color: #495057; display: flex; justify-content: space-between; align-items: center;">
+                    <span>Quick Paste</span>
+                    <button type="button" id="autoFillBtn" class="btn btn-primary"
+                        style="padding: 5px 10px; font-size: 12px; margin-top: 0; width: auto;">Auto Fill</button>
+                </label>
+                <textarea id="quickPasteInput" rows="5"
+                    placeholder="Paste text here...&#10;Contoh:&#10;Rita&#10;Wedding payas agung exclusiev team 6,5jt&#10;Resepsi exclusive team 6,5jt&#10;Akomodasi 1jt&#10;Total 14jt&#10;Dp 2jt&#10;Sisa 12jt"></textarea>
+                <small style="color: #6c757d; font-size: 11px; margin-top: 5px; display: block;">Format: Baris 1 nama,
+                    baris selanjutnya item, lalu Total, Dp, dan Sisa.</small>
+            </div>
+
+
+            <div class="form-group">
+                <label style="display: flex; justify-content: space-between; align-items: center;">
+                    <span>Logo Invoice</span>
+                    <span style="font-size: 12px; color: #6c757d; font-weight: normal;">Default: AKNI Mua</span>
+                </label>
+                <div style="display: flex; gap: 10px; align-items: center;">
+                    <input type="file" id="logoUpload" accept="image/*" style="flex: 1;">
+                    <button type="button" id="removeLogoBtn" class="btn btn-secondary"
+                        style="display: none; padding: 8px 12px; font-size: 12px; margin-top: 0; width: auto; flex: none;">Reset
+                        Default</button>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Company Name</label>
+                <input type="text" id="companyNameInput" value="AKNI MUA BALI">
+            </div>
+
+            <div class="form-group">
+                <label>Bill To</label>
+                <input type="text" id="billToInput" value="NANDA">
+            </div>
+
+            <div class="form-group">
+                <label>Date</label>
+                <input type="date" id="dateInput">
+            </div>
+
+            <h3>Items</h3>
+            <div id="itemsContainer">
+                <div class="item-row">
+                    <input type="text" class="item-name" placeholder="Item Name" value="Ngidih">
+                    <input type="number" class="item-qty" placeholder="Qty" value="1">
+                    <input type="number" class="item-rate" placeholder="Rate" value="5500000">
+                    <button type="button" class="remove-item">X</button>
+                </div>
+            </div>
+            <button type="button" id="addItemBtn" class="btn btn-secondary">Add Item</button>
+
+            <div class="form-group" style="margin-top: 20px;">
+                <label>DP (Down Payment)</label>
+                <input type="number" id="dpInput" value="1000000">
+            </div>
+
+            <div class="form-group">
+                <label>Notes</label>
+                <textarea id="notesInput" rows="4">please make payment to
+Name : Ni Putu Erni Andri Kusuma
+Account Number : 1420265634 (BCA)</textarea>
+            </div>
+
+            <div class="form-group">
+                <label>Terms</label>
+                <input type="text" id="termsInput" value="Pembayaran Lunas Maksimal H-1">
+            </div>
+
+            <button type="button" id="previewBtn" class="btn btn-primary">Preview Invoice</button>
+        </div>
+
+        <!-- Preview Section -->
+        <div class="preview-section" id="previewSection" style="display: none;">
+            <div class="preview-actions">
+                <button type="button" id="backToEditBtn" class="btn btn-secondary">Back to Edit</button>
+                <button type="button" id="downloadPdfBtn" class="btn btn-primary">Download PDF</button>
+            </div>
+
+            <div class="invoice-wrapper" id="invoiceWrapper">
+                <div class="invoice-container" id="invoice">
+                    <div class="invoice-header">
+                        <div class="logo-container">
+                            <img src="logo.png" alt="AKNI Mua Logo" class="logo" id="logoImage">
+                            <h2 id="companyNamePreviewText" style="display: none;">AKNI MUA BALI</h2>
+                        </div>
+                        <div class="title-container">
+                            <h1>INVOICE</h1>
+                        </div>
+                    </div>
+
+                    <div class="divider"></div>
+
+                    <div class="invoice-meta">
+                        <div class="company-title">
+                            <strong id="companyNameHeader">AKNI MUA BALI</strong>
+                        </div>
+                        <div class="date-container">
+                            <span id="datePreview" class="date-box">DATE 23 JULY 2026</span>
+                        </div>
+                    </div>
+
+                    <div class="bill-info">
+                        <div class="bill-to">
+                            <span>BILL TO :</span>
+                            <strong id="billToPreview">NANDA</strong>
+                        </div>
+                        <div class="balance-due">
+                            <span>BALANCE DUE :</span>
+                            <strong id="balanceDuePreview">IDR 4.500.000</strong>
+                        </div>
+                    </div>
+
+                    <table class="invoice-table">
+                        <thead>
+                            <tr>
+                                <th class="text-left">ITEM</th>
+                                <th class="text-center">QTY</th>
+                                <th class="text-left">RATE</th>
+                                <th class="text-left">AMOUNT</th>
+                            </tr>
+                        </thead>
+                        <tbody id="itemsPreview">
+                            <!-- Items will be injected here -->
+                        </tbody>
+                        <tbody class="table-spacing">
+                            <tr>
+                                <td colspan="4"></td>
+                            </tr>
+                        </tbody>
+                        <tbody class="footer-table">
+                            <tr>
+                                <td class="text-left footer-label">DP</td>
+                                <td class="text-center">1</td>
+                                <td class="text-left" id="dpRatePreview">IDR 1.000.000</td>
+                                <td class="text-left" id="dpAmountPreview">IDR 1.000.000</td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <div class="divider"></div>
+
+                    <div class="invoice-footer">
+                        <div class="notes-section">
+                            <p>note:</p>
+                            <p id="notesPreview" class="pre-line">please make payment to
+                                Name : Ni Putu Erni Andri Kusuma
+                                Account Number : 1420265634 (BCA)</p>
+                            <br>
+                            <p><strong id="termsPreview">Term : Pembayaran Lunas Maksimal H-1</strong></p>
+
+                            <div class="stamp-container">
+                                <div class="stamp">
+                                    <span>Thank<br>you</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="totals-section">
+                            <div class="total-row">
+                                <span>total :</span>
+                                <span id="totalPreview">IDR 5.500.000</span>
+                            </div>
+                            <div class="total-row bold">
+                                <span>After DP</span>
+                                <span id="afterDpPreview">IDR 4.500.000</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="defaultLogo.js"></script>
+    <script src="script.js"></script>
+</body>
+
+</html>
